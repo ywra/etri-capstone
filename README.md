@@ -75,15 +75,107 @@ Windows PowerShell:
 
 MCP Host는 위 명령으로 Server를 실행하고 표준 입력과 표준 출력을 통해 통신한다.
 
+## MCP Host 등록
+
+Claude Code에 등록한다. 경로는 절대경로로 적는다. Host가 어느 작업 디렉터리에서 Server를 실행하든 같은 데이터베이스를 사용한다.
+
+Windows:
+
+```powershell
+claude mcp add -s user etri-capstone -- "C:\경로\etri-capstone\.venv\Scripts\python.exe" "C:\경로\etri-capstone\server.py"
+```
+
+macOS와 Linux:
+
+```bash
+claude mcp add -s user etri-capstone -- /경로/etri-capstone/.venv/bin/python /경로/etri-capstone/server.py
+```
+
+등록 결과를 확인한다.
+
+```bash
+claude mcp list
+```
+
+`etri-capstone`이 `Connected`로 표시되면 등록된 것이다. 이미 열려 있는 세션에는 반영되지 않으므로 새 세션을 시작한다.
+
+`-s user`는 모든 프로젝트에서 사용한다는 뜻이다. `-s project`를 쓰면 저장소에 `.mcp.json`이 만들어지지만 절대경로가 함께 커밋되어 다른 컴퓨터와 충돌한다.
+
 ## 제공 Tool
 
 ```text
-search_papers_by_title
+search_papers_by_title   list_reports   update_report   list_papers
+save_report              get_report     delete_report   delete_paper
 ```
 
-입력한 논문명을 OpenAlex에서 검색하고 관련 논문 목록을 반환한다.
+| Tool | 설명 |
+| --- | --- |
+| `search_papers_by_title` | 논문명을 OpenAlex에서 검색해 제목·연도·저자·DOI·주소·인용 수·연구 분야를 반환한다 |
+| `save_report` | 작성한 리포트를 근거가 된 참고 논문과 함께 저장한다 |
+| `list_reports` | 저장된 리포트를 최근 수정 순으로 조회한다. 상태와 태그로 거를 수 있다 |
+| `get_report` | 리포트를 본문과 참고 논문까지 모두 불러온다 |
+| `update_report` | 전달한 필드만 수정한다. 보관은 `status`를 `archived`로 바꾼다 |
+| `delete_report` | 리포트를 삭제한다. 인용 관계만 정리되고 참고 논문은 남는다 |
+| `list_papers` | 저장된 참고 논문을 인용 리포트 수와 함께 조회한다 |
+| `delete_paper` | 참고 논문을 삭제한다. 리포트가 인용 중이면 거부한다 |
 
-OpenAlex API 키가 있다면 실행 환경의 `OPENALEX_API_KEY` 값으로 전달할 수 있다. 기본적인 검색은 API 키 없이도 실행할 수 있다.
+검색 결과 항목은 `save_report`의 `papers` 인자에 그대로 넣을 수 있고, 항목마다 `evidence`에 그 논문이 뒷받침하는 주장을 적는다.
+
+## OpenAlex API 키
+
+검색은 API 키 없이도 동작하지만, 공용 대역은 요청이 몰리면 `HTTP 429`로 거절된다. 키가 있으면 `server.py` 옆에 `.env` 파일을 만들어 적는다.
+
+```text
+OPENALEX_API_KEY=발급받은_키
+```
+
+Server는 시작할 때 이 파일을 읽어 아직 비어 있는 환경 변수만 채운다. MCP Host 설정에서 `OPENALEX_API_KEY`를 직접 넘기면 그 값이 우선한다.
+
+`.env`는 `.gitignore`에 포함되어 커밋되지 않는다. 키는 저장소에 올리지 않는다.
+
+## 데이터 저장
+
+리포트와 참고 논문은 `server.py` 옆의 `research.db`에 저장된다. 파일은 Server를 처음 실행할 때 만들어지며 `.gitignore`로 커밋에서 제외된다. 스키마와 Tool 계약은 `SPEC.md`에 정리되어 있다.
+
+데이터를 초기화하려면 `research.db` 파일을 삭제하고 Server를 다시 실행한다.
+
+## 웹으로 리포트 읽기
+
+저장된 리포트를 브라우저에서 읽는 React 앱이 `web/`에 있다. 브라우저는 `stdio`로 통신하는 MCP Server에 직접 붙을 수 없으므로, 같은 `database.py`를 재사용하는 읽기 전용 HTTP API를 거친다. 설계와 계약은 `SPEC-web.md`에 정리되어 있다.
+
+Node.js 20 이상이 필요하다. 처음 한 번만 의존성을 설치한다.
+
+```bash
+cd web
+npm install
+```
+
+터미널 두 개에서 각각 실행한다.
+
+```bash
+python web_api.py
+```
+
+```bash
+cd web
+npm run dev
+```
+
+브라우저에서 `http://localhost:3000`을 연다. 목록에서 리포트를 누르면 상세 페이지로 이동해 본문과 참고 논문을 읽을 수 있다.
+
+API 서버는 `127.0.0.1:8000`에만 바인딩되므로 같은 네트워크의 다른 기기에서는 접근할 수 없다. 화면은 조회만 제공하며 저장과 수정, 삭제는 MCP Tool을 통한다.
+
+## 다른 컴퓨터에서 사용
+
+저장소를 내려받는 것만으로는 동작하지 않는다. `.env`와 `research.db`는 `.gitignore` 대상이라 함께 오지 않고, MCP 등록의 경로는 컴퓨터마다 다르다.
+
+1. 저장소를 내려받는다.
+2. 위 `준비` 절에 따라 가상환경을 만들고 의존성을 설치한다.
+3. `.env`를 새로 만들고 OpenAlex 키를 적는다. 키는 저장소나 대화 기록을 거쳐 옮기지 않는다.
+4. 위 `MCP Host 등록` 절에 따라 그 컴퓨터의 경로로 등록한다.
+5. 웹 화면을 쓴다면 `web` 디렉터리에서 `npm install`을 실행한다. `node_modules/`도 커밋되지 않는다.
+
+리포트와 참고 논문은 컴퓨터마다 별도의 `research.db`에 쌓이며 서로 동기화되지 않는다.
 
 ## 프로젝트 스킬
 

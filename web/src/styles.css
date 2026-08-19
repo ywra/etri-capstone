@@ -1,0 +1,458 @@
+:root {
+  --ground: #f6f7f5;
+  --surface: #ffffff;
+  --surface-alt: #eef1ee;
+  --line: #dbe0dc;
+  --line-soft: #e8ece9;
+  --ink: #1b201e;
+  --ink-soft: #3d4844;
+  --muted: #5f6b66;
+  --accent: #1f6f5c;
+  --accent-soft: #e2efea;
+  --data: #b8842b;
+  --danger: #a33a2c;
+  --danger-soft: #f6e6e3;
+
+  --sans: "Malgun Gothic", "Segoe UI", system-ui, sans-serif;
+  --mono: "Consolas", "D2Coding", ui-monospace, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground: #121614;
+    --surface: #1a201d;
+    --surface-alt: #222a26;
+    --line: #2d3733;
+    --line-soft: #242d29;
+    --ink: #e8eeea;
+    --ink-soft: #c2cdc7;
+    --muted: #93a099;
+    --accent: #4bbfa0;
+    --accent-soft: #1b352e;
+    --data: #e0a94a;
+    --danger: #e08b7c;
+    --danger-soft: #3a2320;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.app {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+a {
+  color: var(--accent);
+}
+
+code {
+  font-family: var(--mono);
+  font-size: 0.88em;
+  background: var(--surface-alt);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+/* 안내와 오류 */
+
+.notice {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 24px;
+  color: var(--muted);
+}
+
+.notice-error {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.hint {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 8px 12px;
+  margin: 12px 0 0;
+  overflow-x: auto;
+}
+
+.hint-text {
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+/* 머리말 */
+
+.page-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.page-head h1 {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.count {
+  font-family: var(--mono);
+  color: var(--muted);
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* 목록 */
+
+.report-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.report-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--line);
+  border-radius: 3px;
+  padding: 18px 20px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.report-card:hover {
+  border-color: var(--accent);
+}
+
+.report-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.report-card-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.report-id {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.report-card h2 {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.4;
+  text-wrap: balance;
+}
+
+.report-question {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink-soft);
+  border-left: 2px solid var(--accent);
+  padding-left: 10px;
+}
+
+.report-preview {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.report-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+}
+
+.meta-item {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+
+.badge-draft {
+  color: #8a6d3b;
+  background: #f7edda;
+}
+
+.badge-final {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.badge-archived {
+  color: var(--muted);
+  background: var(--surface-alt);
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge-draft {
+    color: #d7b273;
+    background: #33291a;
+  }
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.tag {
+  font-size: 12px;
+  color: var(--ink-soft);
+  background: var(--surface-alt);
+  border-radius: 2px;
+  padding: 1px 7px;
+}
+
+/* 상세 */
+
+.back-link {
+  display: inline-block;
+  font-size: 13.5px;
+  margin-bottom: 20px;
+}
+
+.detail-head {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 20px;
+  margin-bottom: 28px;
+}
+
+.detail-head h1 {
+  font-size: 28px;
+}
+
+.detail-question {
+  margin: 0;
+  font-size: 15.5px;
+  color: var(--ink-soft);
+  border-left: 2px solid var(--accent);
+  padding-left: 12px;
+}
+
+.document {
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+.document h1 {
+  font-size: 24px;
+  margin: 1.6em 0 0.6em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.document h2 {
+  font-size: 20px;
+  margin: 2em 0 0.6em;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.document h3 {
+  font-size: 17px;
+  margin: 1.6em 0 0.5em;
+  color: var(--ink);
+}
+
+.document p {
+  margin: 0 0 1.1em;
+}
+
+.document ul,
+.document ol {
+  margin: 0 0 1.1em;
+  padding-left: 1.4em;
+}
+
+.document li {
+  margin-bottom: 0.4em;
+}
+
+.document strong {
+  color: var(--ink);
+}
+
+.document blockquote {
+  margin: 0 0 1.2em;
+  padding: 10px 16px;
+  border-left: 2px solid var(--line);
+  background: var(--surface-alt);
+  color: var(--muted);
+  font-size: 14.5px;
+}
+
+.document blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.document hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 2em 0;
+}
+
+/* 넓은 표는 문서가 아니라 표 안에서만 가로로 스크롤한다. */
+.document table {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0 0 1.3em;
+  font-size: 13.5px;
+}
+
+.document th,
+.document td {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line-soft);
+  vertical-align: top;
+}
+
+.document th {
+  color: var(--muted);
+  font-weight: 600;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+/* 참고문헌 */
+
+.bibliography {
+  margin-top: 44px;
+  padding-top: 24px;
+  border-top: 2px solid var(--ink);
+}
+
+.bibliography h2 {
+  font-size: 16px;
+  margin: 0 0 18px;
+}
+
+.reference-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.reference {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.reference:last-child {
+  border-bottom: 0;
+}
+
+.reference-order {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  padding-top: 3px;
+}
+
+.reference-title {
+  margin: 0 0 4px;
+  font-size: 15.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.reference-authors {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.reference-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  margin-bottom: 10px;
+}
+
+.cites {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--data);
+  font-weight: 500;
+}
+
+.reference-link {
+  font-size: 12.5px;
+}
+
+.evidence {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  background: var(--surface-alt);
+  border-left: 2px solid var(--accent);
+  padding: 10px 14px;
+  border-radius: 0 3px 3px 0;
+}
+
+.evidence-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  margin-bottom: 3px;
+}
