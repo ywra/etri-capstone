@@ -105,6 +105,13 @@ ON CONFLICT(openalex_id) DO UPDATE SET
 RETURNING id
 """
 
+# 목록과 전체 건수가 같은 조건을 보게 해서 두 값이 어긋나지 않도록 한 곳에 둔다.
+REPORT_FILTER = """
+ WHERE ((:status IS NULL AND (:include_archived OR r.status <> 'archived'))
+        OR r.status = :status)
+   AND (:tag IS NULL OR EXISTS (SELECT 1 FROM json_each(r.tags) WHERE value = :tag))
+"""
+
 SELECT_REPORT_LIST = f"""
 SELECT r.id, r.title, r.research_question, r.status, r.tags, r.version,
        r.created_at, r.updated_at,
@@ -113,11 +120,15 @@ SELECT r.id, r.title, r.research_question, r.status, r.tags, r.version,
             ELSE r.content END AS preview,
        (SELECT COUNT(*) FROM report_papers rp WHERE rp.report_id = r.id) AS paper_count
   FROM reports r
- WHERE ((:status IS NULL AND (:include_archived OR r.status <> 'archived'))
-        OR r.status = :status)
-   AND (:tag IS NULL OR EXISTS (SELECT 1 FROM json_each(r.tags) WHERE value = :tag))
+{REPORT_FILTER}
  ORDER BY r.updated_at DESC, r.id DESC
  LIMIT :limit OFFSET :offset
+"""
+
+COUNT_REPORTS = f"""
+SELECT COUNT(*) AS total
+  FROM reports r
+{REPORT_FILTER}
 """
 
 SELECT_REPORT_PAPERS = """
@@ -353,23 +364,25 @@ def list_reports(
     """저장된 리포트를 최근 수정순으로 조회한다.
 
     status를 지정하지 않으면 archived를 제외한다. include_archived를 켜면 전부 반환한다.
+    count는 이번에 돌려준 건수, total은 조건에 맞는 전체 건수다. 두 값이 다르면 limit에서
+    잘린 것이므로 호출한 쪽이 그 사실을 알 수 있다.
     """
 
     if status is not None:
         status = _require_choice("status", status, REPORT_STATUSES)
     limit, offset = _require_page(limit, offset, MAX_REPORT_PAGE_SIZE)
 
+    parameters = {
+        "status": status,
+        "tag": tag,
+        "limit": limit,
+        "offset": offset,
+        "include_archived": int(include_archived),
+    }
+
     with _transaction() as connection:
-        rows = connection.execute(
-            SELECT_REPORT_LIST,
-            {
-                "status": status,
-                "tag": tag,
-                "limit": limit,
-                "offset": offset,
-                "include_archived": int(include_archived),
-            },
-        ).fetchall()
+        rows = connection.execute(SELECT_REPORT_LIST, parameters).fetchall()
+        total = connection.execute(COUNT_REPORTS, parameters).fetchone()["total"]
 
     reports = [
         {
@@ -386,7 +399,7 @@ def list_reports(
         }
         for row in rows
     ]
-    return {"count": len(reports), "reports": reports}
+    return {"count": len(reports), "total": total, "reports": reports}
 
 
 def get_report(report_id: int) -> dict[str, Any]:

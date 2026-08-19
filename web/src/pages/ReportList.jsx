@@ -3,14 +3,19 @@ import { fetchReports, useApi } from '../api.js'
 
 const STATUS_LABEL = { draft: '초안', final: '확정', archived: '보관' }
 
-/** 미리보기는 본문 앞부분을 그대로 잘라온 값이라 마크다운 기호가 섞여 있다. */
+/**
+ * 미리보기는 본문 앞부분을 그대로 잘라온 값이라 마크다운 기호가 섞여 있다.
+ * 목록 기호는 뒤에 공백이 올 때만 벗긴다. -3.2% 처럼 음수로 시작하는 줄의
+ * 부호를 지워 증감 방향을 뒤집지 않기 위해서다.
+ */
 function plainPreview(text) {
   return text
     .replace(/`([^`]*)`/g, '$1')
     .replace(/\*\*([^*]*)\*\*/g, '$1')
-    .replace(/^[>#\-*\s]+/gm, '')
+    .replace(/^\s*(?:[>#]+\s*|[-*+]\s+)/gm, '')
     .split('\n')
-    .filter((line) => line.trim())
+    .map((line) => line.trim())
+    .filter((line) => line && !/^[-*_]{3,}$/.test(line))
     .join(' ')
 }
 
@@ -45,8 +50,19 @@ export default function ReportList() {
     <>
       <header className="page-head">
         <h1>저장된 리포트</h1>
-        <p className="count">{data.count}건</p>
+        <p className="count">
+          {data.total > data.count
+            ? `${data.total}건 중 ${data.count}건`
+            : `${data.count}건`}
+        </p>
       </header>
+
+      {data.total > data.count && (
+        <p className="truncated">
+          최근 수정순 {data.count}건만 표시합니다. 나머지 {data.total - data.count}건은
+          MCP Tool <code>list_reports</code>의 <code>offset</code>으로 확인할 수 있습니다.
+        </p>
+      )}
 
       <ul className="report-list">
         {data.reports.map((report) => (

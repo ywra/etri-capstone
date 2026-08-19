@@ -62,7 +62,7 @@ Claude Code ─stdio→ server.py ──┘
 
 | 메서드와 경로 | 반환 |
 | --- | --- |
-| `GET /api/reports` | `{ count, reports: [...] }`. 본문 대신 `preview`와 `paper_count`를 포함한다 |
+| `GET /api/reports` | `{ count, total, reports: [...] }`. 본문 대신 `preview`와 `paper_count`를 포함한다 |
 | `GET /api/reports/{id}` | 리포트 전체 컬럼과 `papers[]`. `evidence`를 포함하며 `position` 순이다 |
 
 응답은 `application/json; charset=utf-8`이다. 오류는 상태 코드와 함께 `{ "error": "메시지" }`를
@@ -149,7 +149,7 @@ API 서버가 꺼져 있으면 Vite proxy가 `502`와 함께 JSON이 아닌 본�
 
 1. API 포트는 `8000`을 쓴다.
 2. 목록 정렬은 `updated_at DESC`이며 `database.list_reports()`의 기존 정렬을 그대로 쓴다.
-3. 목록은 한 번에 전부 가져온다. `limit`은 충분히 큰 값으로 고정한다.
+3. 목록은 `database.MAX_REPORT_PAGE_SIZE`(100)까지 한 번에 가져온다. 그보다 많으면 최근 수정순으로 잘리며, 응답의 `total`과 `count`가 달라지므로 화면이 잘렸다는 사실과 남은 건수를 함께 알린다.
 4. `react-markdown`은 기본적으로 원시 HTML을 렌더링하지 않으므로 별도 살균 처리를 하지 않는다.
 5. 상태 배지 표기는 `draft`, `final`, `archived` 세 가지다.
 6. 두 서버는 터미널 두 개에서 각각 실행하며 절차는 README에 적는다.

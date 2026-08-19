@@ -126,6 +126,16 @@ code {
 
 /* 목록 */
 
+.truncated {
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--data);
+  background: var(--surface-alt);
+  border-left: 2px solid var(--data);
+  border-radius: 0 3px 3px 0;
+}
+
 .report-list {
   list-style: none;
   margin: 0;

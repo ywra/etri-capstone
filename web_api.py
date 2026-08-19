@@ -43,7 +43,8 @@ class ReportHandler(BaseHTTPRequestHandler):
 
             if path.startswith(REPORT_PATH_PREFIX):
                 raw_id = path[len(REPORT_PATH_PREFIX):]
-                if not raw_id.isdigit():
+                # isdigit()은 위첨자 같은 문자에도 참이라 int()에서 터진다.
+                if not raw_id.isdecimal():
                     return self._respond(
                         404, {"error": f"report_id {raw_id!r}는 숫자가 아닙니다."}
                     )

@@ -55,14 +55,14 @@
 | --- | --- | --- |
 | `search_papers_by_title` | `title`, `limit=5` (최대 10) | `query`, `count`, `papers[]` |
 | `save_report` | `title`, `content`, `research_question=None`, `report_format='markdown'`, `status='draft'`, `tags=None`, `papers=None` | `report_id`, `version`, `created_at`, `saved_paper_count` |
-| `list_reports` | `status=None`, `tag=None`, `limit=20`, `offset=0` | `count`, `reports[]` |
+| `list_reports` | `status=None`, `tag=None`, `limit=20`, `offset=0` | `count`, `total`, `reports[]` |
 | `get_report` | `report_id` | 리포트 전체 컬럼과 `papers[]` |
 | `update_report` | `report_id`와 나머지 선택 필드 | `report_id`, `version`, `updated_at`, `changed_fields[]` |
 | `delete_report` | `report_id` | `deleted_title`, `unlinked_paper_count` |
 | `list_papers` | `limit=50`, `offset=0` | `count`, `papers[]` |
 | `delete_paper` | `paper_id` | `deleted_title` |
 
-`list_reports`의 각 항목은 본문 전체 대신 200자 `preview`와 `paper_count`를 포함한다.
+`list_reports`의 각 항목은 본문 전체 대신 200자 `preview`와 `paper_count`를 포함한다. `count`는 이번에 돌려준 건수이고 `total`은 조건에 맞는 전체 건수다. 두 값이 다르면 `limit`에서 잘린 것이다.
 `get_report`의 `papers[]`는 `evidence`를 포함하며 `position` 순으로 정렬한다.
 `list_papers`의 각 항목은 인용 중인 리포트 수 `cited_in`을 포함한다.
 
