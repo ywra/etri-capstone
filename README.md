@@ -78,12 +78,40 @@ MCP Host는 위 명령으로 Server를 실행하고 표준 입력과 표준 출�
 ## 제공 Tool
 
 ```text
-search_papers_by_title
+search_papers_by_title   list_reports   update_report   list_papers
+save_report              get_report     delete_report   delete_paper
 ```
 
-입력한 논문명을 OpenAlex에서 검색하고 관련 논문 목록을 반환한다.
+| Tool | 설명 |
+| --- | --- |
+| `search_papers_by_title` | 논문명을 OpenAlex에서 검색해 제목·연도·저자·DOI·주소·인용 수·연구 분야를 반환한다 |
+| `save_report` | 작성한 리포트를 근거가 된 참고 논문과 함께 저장한다 |
+| `list_reports` | 저장된 리포트를 최근 수정 순으로 조회한다. 상태와 태그로 거를 수 있다 |
+| `get_report` | 리포트를 본문과 참고 논문까지 모두 불러온다 |
+| `update_report` | 전달한 필드만 수정한다. 보관은 `status`를 `archived`로 바꾼다 |
+| `delete_report` | 리포트를 삭제한다. 인용 관계만 정리되고 참고 논문은 남는다 |
+| `list_papers` | 저장된 참고 논문을 인용 리포트 수와 함께 조회한다 |
+| `delete_paper` | 참고 논문을 삭제한다. 리포트가 인용 중이면 거부한다 |
 
-OpenAlex API 키가 있다면 실행 환경의 `OPENALEX_API_KEY` 값으로 전달할 수 있다. 기본적인 검색은 API 키 없이도 실행할 수 있다.
+검색 결과 항목은 `save_report`의 `papers` 인자에 그대로 넣을 수 있고, 항목마다 `evidence`에 그 논문이 뒷받침하는 주장을 적는다.
+
+## OpenAlex API 키
+
+검색은 API 키 없이도 동작하지만, 공용 대역은 요청이 몰리면 `HTTP 429`로 거절된다. 키가 있으면 `server.py` 옆에 `.env` 파일을 만들어 적는다.
+
+```text
+OPENALEX_API_KEY=발급받은_키
+```
+
+Server는 시작할 때 이 파일을 읽어 아직 비어 있는 환경 변수만 채운다. MCP Host 설정에서 `OPENALEX_API_KEY`를 직접 넘기면 그 값이 우선한다.
+
+`.env`는 `.gitignore`에 포함되어 커밋되지 않는다. 키는 저장소에 올리지 않는다.
+
+## 데이터 저장
+
+리포트와 참고 논문은 `server.py` 옆의 `research.db`에 저장된다. 파일은 Server를 처음 실행할 때 만들어지며 `.gitignore`로 커밋에서 제외된다. 스키마와 Tool 계약은 `SPEC.md`에 정리되어 있다.
+
+데이터를 초기화하려면 `research.db` 파일을 삭제하고 Server를 다시 실행한다.
 
 ## 프로젝트 스킬
 
