@@ -75,6 +75,32 @@ Windows PowerShell:
 
 MCP Host는 위 명령으로 Server를 실행하고 표준 입력과 표준 출력을 통해 통신한다.
 
+## MCP Host 등록
+
+Claude Code에 등록한다. 경로는 절대경로로 적는다. Host가 어느 작업 디렉터리에서 Server를 실행하든 같은 데이터베이스를 사용한다.
+
+Windows:
+
+```powershell
+claude mcp add -s user etri-capstone -- "C:\경로\etri-capstone\.venv\Scripts\python.exe" "C:\경로\etri-capstone\server.py"
+```
+
+macOS와 Linux:
+
+```bash
+claude mcp add -s user etri-capstone -- /경로/etri-capstone/.venv/bin/python /경로/etri-capstone/server.py
+```
+
+등록 결과를 확인한다.
+
+```bash
+claude mcp list
+```
+
+`etri-capstone`이 `Connected`로 표시되면 등록된 것이다. 이미 열려 있는 세션에는 반영되지 않으므로 새 세션을 시작한다.
+
+`-s user`는 모든 프로젝트에서 사용한다는 뜻이다. `-s project`를 쓰면 저장소에 `.mcp.json`이 만들어지지만 절대경로가 함께 커밋되어 다른 컴퓨터와 충돌한다.
+
 ## 제공 Tool
 
 ```text
@@ -112,6 +138,17 @@ Server는 시작할 때 이 파일을 읽어 아직 비어 있는 환경 변수�
 리포트와 참고 논문은 `server.py` 옆의 `research.db`에 저장된다. 파일은 Server를 처음 실행할 때 만들어지며 `.gitignore`로 커밋에서 제외된다. 스키마와 Tool 계약은 `SPEC.md`에 정리되어 있다.
 
 데이터를 초기화하려면 `research.db` 파일을 삭제하고 Server를 다시 실행한다.
+
+## 다른 컴퓨터에서 사용
+
+저장소를 내려받는 것만으로는 동작하지 않는다. `.env`와 `research.db`는 `.gitignore` 대상이라 함께 오지 않고, MCP 등록의 경로는 컴퓨터마다 다르다.
+
+1. 저장소를 내려받는다.
+2. 위 `준비` 절에 따라 가상환경을 만들고 의존성을 설치한다.
+3. `.env`를 새로 만들고 OpenAlex 키를 적는다. 키는 저장소나 대화 기록을 거쳐 옮기지 않는다.
+4. 위 `MCP Host 등록` 절에 따라 그 컴퓨터의 경로로 등록한다.
+
+리포트와 참고 논문은 컴퓨터마다 별도의 `research.db`에 쌓이며 서로 동기화되지 않는다.
 
 ## 프로젝트 스킬
 
