@@ -113,7 +113,8 @@ SELECT r.id, r.title, r.research_question, r.status, r.tags, r.version,
             ELSE r.content END AS preview,
        (SELECT COUNT(*) FROM report_papers rp WHERE rp.report_id = r.id) AS paper_count
   FROM reports r
- WHERE ((:status IS NULL AND r.status <> 'archived') OR r.status = :status)
+ WHERE ((:status IS NULL AND (:include_archived OR r.status <> 'archived'))
+        OR r.status = :status)
    AND (:tag IS NULL OR EXISTS (SELECT 1 FROM json_each(r.tags) WHERE value = :tag))
  ORDER BY r.updated_at DESC, r.id DESC
  LIMIT :limit OFFSET :offset
@@ -347,7 +348,13 @@ def list_reports(
     tag: str | None = None,
     limit: int = 20,
     offset: int = 0,
+    include_archived: bool = False,
 ) -> dict[str, Any]:
+    """저장된 리포트를 최근 수정순으로 조회한다.
+
+    status를 지정하지 않으면 archived를 제외한다. include_archived를 켜면 전부 반환한다.
+    """
+
     if status is not None:
         status = _require_choice("status", status, REPORT_STATUSES)
     limit, offset = _require_page(limit, offset, MAX_REPORT_PAGE_SIZE)
@@ -355,7 +362,13 @@ def list_reports(
     with _transaction() as connection:
         rows = connection.execute(
             SELECT_REPORT_LIST,
-            {"status": status, "tag": tag, "limit": limit, "offset": offset},
+            {
+                "status": status,
+                "tag": tag,
+                "limit": limit,
+                "offset": offset,
+                "include_archived": int(include_archived),
+            },
         ).fetchall()
 
     reports = [
